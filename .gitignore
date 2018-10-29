@@ -1,0 +1,10 @@
+# Serverless directories
+.serverless
+.build
+secrets.yml
+
+# Webpack directories
+.webpack
+
+# Npm
+node_modules
