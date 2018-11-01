@@ -30,8 +30,6 @@
   "javascript.validate.enable": false,
   "javascript.format.enable": true,
   "json.format.enable": true,
-  "tslint.enable": true,
-  "tslint.autoFixOnSave": true,
   "typescript.tsdk": "node_modules/typescript/lib",
   "beautify.ignore": ["**/*.json", "**/*.js", "**/*.ts"],
 }

@@ -24,6 +24,8 @@
     }
   },
   "rules": {
-     "no-console": [0, ""]
+     "no-console": [0, ""],
+     "no-underscore-dangle": "off",
+     "arrow-body-style": "off"
   }
 }

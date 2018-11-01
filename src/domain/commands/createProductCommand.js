@@ -1,15 +1,13 @@
-import productRepository from '@/data/productRepository';
+import { db } from '@/utils/miniMongo';
 
 const createProductCommand = (resource) => {
   const newProduct = {
     ...resource,
-    id: new Date().valueOf(),
     image: resource.image || 'https://dummyimage.com/300x300.jpg',
   };
 
   // Add to users's
-  productRepository.add(newProduct);
-  return newProduct;
+  return db.products.$insertOne(newProduct);
 };
 
 export default createProductCommand;

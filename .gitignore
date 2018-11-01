@@ -1,7 +1,7 @@
 # Serverless directories
 .serverless
 .build
-secrets.yml
+.env.production
 
 # Webpack directories
 .webpack

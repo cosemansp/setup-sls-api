@@ -2,12 +2,13 @@ import createApp from 'lambda-api';
 import * as yup from 'yup';
 import logger from 'lambda-logger-node';
 
-import productRepository from '@/data/productRepository';
 import deleteProductCommand from '@/domain/commands/deleteProductCommand';
 import updateProductCommand from '@/domain/commands/updateProductCommand';
 import createProductCommand from '@/domain/commands/createProductCommand';
 import { NotFoundError, BadRequestError } from '@/errors';
-import withWarmup from '@/utils/withWarmup';
+import { withWarmup } from '@/utils/middleware';
+
+import { MongoUri, db } from '@/utils/miniMongo';
 
 import productMapper from '../mappers/productMapper';
 import errorHandler from '../middleware/errorHandler';
@@ -22,28 +23,28 @@ const api = createApp({
   // },
   logger: false,
 });
-// productRepository.seedProducts();
 
 const productSchema = yup.object().shape({
   id: yup.number(),
   title: yup.string().required(),
   price: yup.number().required(),
-  basePrice: yup.number().required(),
+  basePrice: yup.number(),
   stocked: yup.boolean(),
 });
 
-api.get('api/products', (req) => {
-  console.log('get all products1');
-  logger.info('get all products2');
-  const products = productRepository.getAll();
+api.get('api/products', async () => {
+  console.log('get all products');
+
+  const products = await db.products
+    .find()
+    .limit(30)
+    .toArray();
   return products.map((product) => productMapper.map(product));
 });
 
-api.get('api/products/:id', (req, res) => {
-  const id = Number(req.params.id);
-  console.info('get product1', id);
-  logger.info('get product2', id);
-  const product = productRepository.getById(id);
+api.get('api/products/:id', async (req, res) => {
+  console.info('get product', req.params.id);
+  const product = await db.products.$findById(req.params.id);
   if (!product) {
     throw new NotFoundError();
   }
@@ -57,7 +58,7 @@ api.post('api/products', async (req) => {
     throw new BadRequestError(result.errors);
   }
 
-  const product = createProductCommand(req.body);
+  const product = await createProductCommand(req.body);
   return productMapper.map(product);
 });
 
@@ -68,16 +69,15 @@ api.put('api/products/:id', async (req) => {
     throw new BadRequestError(result.errors);
   }
 
-  const id = Number(req.params.id);
-  const product = updateProductCommand(req.body, id);
+  const product = await updateProductCommand(req.body, req.params.id);
   return productMapper.map(product);
 });
 
-api.delete('api/products/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const product = deleteProductCommand(id);
+api.delete('api/products/:id', async (req, res) => {
+  const product = await deleteProductCommand(req.params.id);
   if (!product) {
-    res.status(204);
+    res.status(204).json();
+    return undefined;
   }
   return productMapper.map(product);
 });
@@ -92,16 +92,27 @@ api.options('/*', (req, res) => {
   });
 });
 
+api.use(async (req, res, next) => {
+  console.log('MONGODB_URI', process.env.MONGODB_URI);
+  const mongoUri = MongoUri.parse(process.env.MONGODB_URI);
+  req.db = await db.connect(mongoUri);
+  db.bind('products');
+  next();
+});
+
 // handle errors
 api.use(errorHandler);
 
 // lambda function
 const productsHandler = (event, context) => {
-  // logger.restoreConsoleLog();
+  // Allows a Lambda function to return its result to the caller without requiring
+  // that the MongoDB database connection be closed.
+  context.callbackWaitsForEmptyEventLoop = false; // eslint-disable-line
 
-  console.info('just a test');
+  logger.restoreConsoleLog();
   return api.run(event, context);
 };
 
 // export
+// export default logger(withWarmup(productsHandler));
 export default withWarmup(productsHandler);

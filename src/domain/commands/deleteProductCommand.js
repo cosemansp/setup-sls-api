@@ -1,12 +1,10 @@
-import productRepository from '@/data/productRepository';
+import { db } from '@/utils/miniMongo';
 
 const deleteProductCommand = (productId) => {
-  const product = productRepository.getById(productId);
+  const product = db.products.$findByIdAndDelete(productId);
   if (!product) {
     return null;
   }
-
-  productRepository.delete(product);
   return product;
 };
 

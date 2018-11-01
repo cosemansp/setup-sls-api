@@ -10,6 +10,7 @@ plugins:
   - serverless-webpack
   - serverless-offline
   - serverless-plugin-warmup
+  - serverless-dotenv-plugin
 
 # The `provider` defines where your service will be deployed
 # ===================================================================
@@ -19,13 +20,14 @@ provider:
   region: eu-central-1
   # If you want to change to a different AWS profile
   # from ~/.aws/credentials, you can do so here
-  profile: default
+  profile: peter
   stage: dev
   timeout: 10  # (default is 6 seconds)
   memorySize: 256
   versionFunctions: true
   environment:
     # BUCKET: "${self:custom.bucket}"
+    TEST: ${ssm:supermanToken}
   iamRoleStatements:
     - Effect: 'Allow'
       Action:
@@ -48,8 +50,7 @@ provider:
 # Custom variables
 # ===================================================================
 custom:
-  stage: ${opt:stage, self:provider.stage}
-  secrets: ${file(secrets.yml):${self:custom.stage}}
+  stage: ${opt:stage, env:AWS_REGION, self:provider.stage}
   serverless-offline:
     port: 3000
   webpack:
@@ -64,13 +65,21 @@ custom:
 # Service wide environment variables
 # ===================================================================
 #  environment:
-#    SECRET_ONE: "${self:custom.secrets.SECRET_ONE}"
-#    MONGO_URI: "${self:custom.secrets.MONGO_URI}"
+#    MONGODB_URI: "${env:MONGODB_URI}"
+#    TEST: ${ssm:supermanToken}
+#    DYANMODB_TABLE: "${env:DYANMODB_TABLE}"
 
 
 # The `Functions`
 # ===================================================================
 functions:
+  graphql:
+    handler: src/graphql/handler.default
+    events:
+    - http:
+        path: graphql
+        method: ANY
+        cors: true
   productsApi:
     handler: src/api/handlers/products.default
     warmup: true
