@@ -27,6 +27,12 @@ export class NotFoundError extends HttpError {
   }
 }
 
+export class MethodNotAllowedError extends HttpError {
+  constructor(message = 'The method was not allowed') {
+    super(httpStatus.METHOD_NOT_ALLOWED, message);
+  }
+}
+
 export class BadRequestError extends HttpError {
   constructor(details) {
     super(httpStatus.BAD_REQUEST, 'One or more validations failed', details);
@@ -41,10 +47,7 @@ export class UnauthorizedError extends HttpError {
 
 export class ForbiddenError extends HttpError {
   constructor(path = 'this resource') {
-    super(
-      httpStatus.FORBIDDEN,
-      `Forbidden, you don't have permission to access ${path}`,
-    );
+    super(httpStatus.FORBIDDEN, `Forbidden, you don't have permission to access ${path}`);
   }
 }
 

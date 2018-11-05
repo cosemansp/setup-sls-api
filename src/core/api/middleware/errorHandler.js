@@ -16,6 +16,7 @@ const errorHandler = (err, req, res, next) => {
 
   res.status(statusCode).send(payload);
   next();
+  // return payload;
 };
 
 export default errorHandler;

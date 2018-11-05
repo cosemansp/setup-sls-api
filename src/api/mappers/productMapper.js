@@ -1,6 +1,6 @@
 export default {
   map(product) {
-    // for now 1-1 mapper
-    return { ...product };
+    const resource = { id: product._id, ...product, _id: undefined };
+    return resource;
   },
 };

@@ -1,11 +1,11 @@
-import { db } from '@/utils/miniMongo';
+/* eslint-disable import/prefer-default-export */
 
-const deleteProductCommand = (productId) => {
-  const product = db.products.$findByIdAndDelete(productId);
+import db from '~/core/db';
+
+export const deleteProductCommand = (productId) => {
+  const product = db.products.findOneAndDelete({ _id: productId });
   if (!product) {
     return null;
   }
   return product;
 };
-
-export default deleteProductCommand;

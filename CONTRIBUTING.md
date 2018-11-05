@@ -1,4 +1,4 @@
-# Contributing to Happiness
+# Contributing to Homepass
 
 We'd love for you to contribute to this source code and to make the service even better than it is today!
 Here are the guidelines we'd like you to follow:

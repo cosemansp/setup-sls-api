@@ -23,11 +23,11 @@ provider:
   profile: peter
   stage: dev
   timeout: 10  # (default is 6 seconds)
-  memorySize: 256
+  memorySize: 256 # (default is 128 MB)
   versionFunctions: true
   environment:
     # BUCKET: "${self:custom.bucket}"
-    TEST: ${ssm:supermanToken}
+    # TEST: ${ssm:supermanToken}
   iamRoleStatements:
     - Effect: 'Allow'
       Action:
@@ -52,9 +52,11 @@ provider:
 custom:
   stage: ${opt:stage, env:AWS_REGION, self:provider.stage}
   serverless-offline:
-    port: 3000
+    port: 3001
   webpack:
-    includeModules: true
+    includeModules:
+      forceExclude:
+        - aws-sdk
     webpackConfig: ./webpack.config.js
     packager: 'yarn'   # Packager that will be used to package your external modules
 
@@ -73,13 +75,6 @@ custom:
 # The `Functions`
 # ===================================================================
 functions:
-  graphql:
-    handler: src/graphql/handler.default
-    events:
-    - http:
-        path: graphql
-        method: ANY
-        cors: true
   productsApi:
     handler: src/api/handlers/products.default
     warmup: true

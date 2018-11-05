@@ -1,4 +1,4 @@
-import { MongoUri, db } from '../miniMongo';
+import { MongoUri, db } from '../../obsolete/miniMongo';
 
 export default (uri) => (handler) => (event, context, callback) => {
   // Allows a Lambda function to return its result to the caller without requiring
